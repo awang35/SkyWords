@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+   
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        <title>
+        demo
+        </title>
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/jquery.mobile/1.1.0/jquery.mobile-1.1.0.min.css" />
+        <link rel="stylesheet" href="Main Menu/my.css" />
+        <style>
+            /* App custom styles */
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js">
+        </script>
+        <script src="https://ajax.aspnetcdn.com/ajax/jquery.mobile/1.1.0/jquery.mobile-1.1.0.min.js">
+        </script>
+        <script src="Main Menu/my.js">
+        </script>
+
+        <link rel="stylesheet" href="master.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
+        <script type="text/javascript" charset="utf-8" src="cordova-1.8.1.js"></script>
+    
+    </head>
+    <body >
+        <!-- Home -->
+        <div data-role="page" id="page1">
+            <div data-theme="a" data-role="header">
+                <h4>
+                    Main Menu
+                </h4>
+            </div>
+            <div data-role="content" style="padding: 15px">
+                <a data-role="button" data-transition="fade" data-theme="b" href="app.html" data-ajax="false">
+                    Quick Play
+                </a>
+               <!-- <a data-role="button" data-transition="fade" data-theme="b" href="app.html">
+                    Quick Play
+                </a>-->
+                <a data-role="button" data-transition="fade" data-theme="b" href="#page1">
+                    Resume
+                </a>
+                <a data-role="button" data-transition="fade" data-theme="b" href="studyMode.html">
+                    Study Mode
+                </a>
+                <a data-role="button" data-transition="fade" data-theme="b" href="categoryMode.html">
+                    Category Mode
+                </a>
+                <a data-role="button" data-transition="fade" data-theme="b" href="tutorial.html">
+                    Tutorial
+                </a>
+                <a data-role="button" data-transition="fade" data-theme="b" href="#page1">
+                    Scoreboard
+                </a>
+                <a data-role="button" data-transition="fade" data-theme="b" href="#page1">
+                    Options
+                </a>
+            </div>
+        </div>
+        <script>
+            //App custom javascript
+        </script>
+    </body>
+</html>

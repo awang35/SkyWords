@@ -1,0 +1,435 @@
+﻿<!DOCTYPE HTML />
+<html>
+    
+    <head>
+        <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0" />
+        <!--<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no;" /> -->
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+        
+        <link rel="Stylesheet" href="background/background.css" type="text/css" />
+        <script type="text/javascript" charset="utf-8" src="randomGen.js"></script>
+        <script type="text/javascript" charset="utf-8" src="word.js"></script>
+        <script type="text/javascript" charset="utf-8" src="converToLetters.js"></script>
+        <script type="text/javascript" charset="utf-8" src="convertToNum.js"></script>
+        <script type="text/javascript" charset="utf-8" src="points.js"></script>
+        <script type="text/javascript" charset="utf-8" src="displayWord.js"></script>
+        <script type="text/javascript" charset="utf-8" src="progressbar.js"></script>
+        
+        
+        
+        <title>Prototype</title>
+        <link rel="stylesheet" href="master.css" type="text/css" media="screen" title="no title" charset="utf-8"/>
+        <script type="text/javascript" charset="utf-8" src="cordova-1.8.1.js"></script>
+        
+        <script type="text/javascript">
+            document.addEventListener("deviceready", onDeviceReady, false);
+            var LetterPercent = 4;
+            /*Canvas Creation*/
+            var can;
+            var ctx;
+            
+            /*Touch Varibles*/
+            var canX = new Array();     //Store X coordinate
+            var canY = new Array();     //Store Y coordinate
+            
+            //Will determine if your finger is on the screen
+            var mouseIsDown = 0;
+            //len will determine the amount of times a finger was deteteced on the screen
+            var len = 0;
+            
+            /*Point System Varibles*/
+            var counter = 0;
+            var totalPoints = 0;
+            var percentBar = 50;
+            
+            /*Global RandomGen manipulation arrays and varibles*/
+            var numDrop = new Array();          //This array should determine the letter that will drop, will store as a number
+            var splitWord = new Array();        //Mainly as a temp  array
+            var word1 = new Array();            //Mainly as a temp array
+            var numWord = new Array();          //The array that will hold the word, so it can be compared, converted to numbers
+            var LetterCounters = 0;             //This counter will never be greater than the length of the word
+            var HasLetterReachBottom = false;   
+            
+            /*Display On Screen Varibles*/
+            var letter = "";
+            
+            /*
+             The position in the y-direction of each letter
+             Where there should be a max of 6 letters on the 
+             screen at a time.  */
+            var position = new Array();
+            
+            /*Gameplay2 Arrays and varibles*/
+            var TempLetterArray = new Array();
+            var TempNumberArray = new Array();
+            //will change the game play to type 2 if gamePlay2 = 1; else if 0, it will be gamePlay1
+            var gamePlay2 = 0;              
+            
+            /*A bunch of touch functions*/
+            function touchUp() {
+                mouseIsDown = 0;
+                len = e.targetTouches.length;
+            }
+            function mouseUp() {
+                mouseIsDown = 0;
+                mouseXY();
+            }
+            function mouseDown() {
+                
+                mouseIsDown = 1;
+                mouseXY();
+            }
+            function touchDown() {
+                mouseIsDown = 1;
+                touchXY();
+            }
+            
+            function mouseXY(e) {
+                //Prevents scrolling on the phone
+                e.preventDefault();
+                canX[0] = e.pageX - can.offsetLeft;
+                canY[0] = e.pageY - can.offsetTop;
+                len = 1;
+            }
+            
+            
+            function touchXY(e) {
+                e.preventDefault();
+                len = e.targetTouches.length;
+                /*Based on the amount of fingers detected add the coordinates to the arrays*/
+                for (i = 0; i < len; i++) {
+                    canX[i] = e.targetTouches[i].pageX - can.offsetLeft;
+                    canY[i] = e.targetTouches[i].pageY - can.offsetTop;
+                }
+            }
+            
+            
+            /*This function will call newWord() to get the current avalible word to be displayed on screen
+             and used. The word will be split into individual letters than converted to numbers so that it
+             is easier to compare
+             */
+            function getWord() {
+                var word = newWord();
+                displayWord();
+                word1.length = 0;
+                numWord.length = 0;
+                splitWord = word.split("");
+                for (i = 0; i < splitWord.length; i++) {
+                    word1[i] = splitWord[i];
+                    numWord[i] = converToNum(splitWord[i]);
+                }
+            }
+            
+            /*Will initilize all position of letters in the y-direction to 0 
+             and assign the corresponding random letters to be printed onto the
+             screen
+             */
+            function onDeviceReady() {
+                /*
+                 //debug
+                 debugCan = document.getElementById("debug");
+                 debugcontext = debugCan.getContext("2d");
+                 debugcontext.font = "12pt Calibri";
+                 //debug*/
+                
+                can = document.getElementById("can");
+                ctx = can.getContext("2d");
+                ctx.font = "bold 20pt Calibri";
+                if ((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i))) {
+                    ctx.scale(1, .92);
+                }
+                
+                //Call getWord to display he word onscreen
+                getWord();
+                
+                /*For displying the individual letters in the word in non-sequeantial order*/
+                
+                if (gamePlay2 == 1) {
+                    TempLetterArray = word1;
+                    for (var i = 0; i < numWord.length; i++) {
+                        TempNumberArray[i] = numWord[i];
+                    }
+                }
+                
+                /*Functions that will wait for the touch events to happen on the phone*/
+                document.addEventListener("mousedown", mouseDown, false);
+                document.addEventListener("mousemove", mouseXY, false);
+                document.addEventListener("touchstart", touchDown, false);
+                document.addEventListener("touchend", touchUp, false);
+                document.addEventListener("touchmove", touchXY, false);
+                document.body.addEventListener("mouseup", mouseUp, false);
+                document.body.addEventListener("touchcancel", touchUp, false);
+                
+                //Inilize the random letters into the array, so that it is ready to be dropped
+                numDrop = getRandom();
+                //setRandomPercent(10);
+                
+                //All positions of the letters will be at zero, inidicating it is on top of the screen
+                for (i = 0; i < 6; i++) {
+                    position[i] = 0;
+                }
+                
+                //Once everything is initilized, call updateGameBoard() to re-draw the letters on the screen
+                
+                updateGameBoard();
+            }
+            
+            
+            /*will clear the gameboard each time this function is called*/
+            function updateGameBoard() {
+                if (percentBar == 0) {
+                    window.document.location.href = "lose.html";
+                }
+                //If HasLetterReachBottom is true, allow redraw of whole canvas to highlight letter
+                if (HasLetterReachBottom == true) {
+                    //Clears the full canvas, so that the word at the bottom of the screen can be redrawn
+                    ctx.clearRect(0, 0, can.width, can.height);
+                    /*This is where it will highlight the letter for you if it is correct*/
+                    if (gamePlay2 == 1) {
+                        word1 = TempLetterArray;
+                        //Display letters in non-sequantial order
+                        displayWord2();
+                    }
+                    else {
+                        //Display letters in sequantial order
+                        displayWord();
+                    }
+                    //Reset HasLetterReachBottom to false
+                    HasLetterReachBottom = false;
+                    
+                    //If the wordCounter is equal to the current word length
+                    if (LetterCounters == splitWord.length) {
+                        
+                        //reset wordCounter to zero
+                        LetterCounters = 0;
+                        
+                        //Than clear the whole canvas
+                        ctx.clearRect(0, 0, can.width, can.height);
+                        
+                        //Get new word
+                        NextWord++;
+                        getWord();
+                        
+                        //Than display the unhighlighted word
+                        displayWord();
+                        
+                        //gamePlay2 needs this, else it will crash, will fix later
+                        if (gamePlay2 == 1) {
+                            TempLetterArray.length = 0;
+                            TempNumberArray.length = 0;
+                            getWord();
+                            TempLetterArray = word1;
+                            for (var i = 0; i < numWord.length; i++) {
+                                TempNumberArray[i] = numWord[i];
+                            }
+                            displayWord2();
+                        }
+                    }
+                }
+                
+                //Clear only 3/4 of the canvas, where the other 1/4 is where the word is at
+                ctx.clearRect(0, 0, can.width, 450);
+                
+   
+                
+                ctx.fillStyle = "black";
+                ctx.fillText(totalPoints, 100, 450);
+                
+                //Will clear the percent bar and re-draw it
+                ctx.clearRect(310, 450, 0, 0);
+                ctx.fillStyle = "Lime";
+           //     ctx.fillText(percentBar +" %", 19, 490);
+                
+                /*Start creating a path for which the letters will drop*/
+                for (i = 0; i < 6; i++) {
+                    
+                    /*Increase the Y-position of the letters*/
+                    position[i] = position[i] + 2;
+                    
+                    /*When the letters finally hit the bottom, check if the letter in the word 
+                     is the same as the letter that has reached the bottom. And make sure if
+                     the letter is in sequence of the word*/
+                    
+                    //If position of the letter as reached a certain height
+                    if (position[i] >= can.height - 130) {
+                        if (gamePlay2 == 1) {
+                            //Check through the word if the letter that just reached the bottom is in the word
+                            var LetterIsInWord = false;
+                            for (z = 0; z < TempLetterArray.length; z++) {
+                                //If letter is in the word, break out of loop  immediatly and assign a token
+                                if (numDrop[i] == TempNumberArray[z]) {
+                                    HasLetterReachBottom = true;
+                                    LetterIsInWord = true;
+                                    
+                                    //The token represents what letter in the word to highlight
+                                    TempLetterArray[z] = "#";
+                                    
+                                    /*Assign an unused number as a place holder, where in
+                                     the position of the array that the letter was correct*/
+                                    TempNumberArray[z] = 30;
+                                    
+                                    //Point System
+                                    counter++;
+                                    ctx.clearRect(0, 450, 50, can.height);
+                                    percentBar++;
+                                    totalPoints += 100;
+                                    
+                                    //Increment to the next letter that should be dropped
+                                    LetterCounters++;
+                                    //Get the next correct letter and store it into the buffer array
+                                    // numDrop[i] = getRandomDrop(true);
+                                    numDrop[i] = getRandomPercent(LetterPercent);
+                                    break;
+                                }
+                            }
+                            
+                            if (LetterIsInWord == false) {
+                                
+                                //Points System shall go here
+                                //totalPoints -= 1000;
+                                counter = 0;
+                                ctx.clearRect(0, 450, 50, can.height); 
+                                percentBar = percentBar - 10;
+                                
+                                //Since letter is not in the word, just randomize the next set of letters
+                                //  numDrop[i] = getRandomDrop(false);
+                                numDrop[i] = getRandomPercent(LetterPercent);
+                            } else {
+                                
+                            }
+                        }
+                        //Else if gamePlay 1
+                        else {
+                            if (numDrop[i] == numWord[LetterCounters]) {
+                                HasLetterReachBottom = true;
+                                
+                                //Point System Shall go here
+                                counter++;
+                                ctx.clearRect(0, 450, 50, can.height);
+                                percentBar++;
+                                totalPoints += 100;
+                                
+                                //Get the next correct letter within the word
+                                LetterCounters++;
+                                //numDrop[i] = getRandomDrop(true);
+                                numDrop[i] = getRandomPercent(LetterPercent);
+                            }
+                            else {
+                                
+                                //Assign a random letter
+                                //numDrop[i] = getRandomDrop(false);
+                                numDrop[i] = getRandomPercent(LetterPercent);
+                                
+                                /*Will call the point system*/
+                                counter = 0;
+                                ctx.clearRect(0, 450, 50, can.height);
+                                percentBar = percentBar - 10;              
+                            }
+                        }
+                        
+                        /*After the letter has reached the bottom, need to 
+                         change the position of the letters and put them off screen*/
+                        position[i] = -10;
+                    }
+                    
+                    
+                    //Postion of the letters in the x and y direction
+                    var y = position[i];
+                    var x = (i + 1) * 45;
+                    
+                    var image = new Image();
+                    
+                    image.src = "hubble.png";
+                    
+                    
+                    //The re-draw letters
+                    ctx.beginPath();
+                    //  ctx.fillStyle = "White";
+                    var pat = ctx.createPattern(image, "repeat");
+                    ctx.fillStyle = pat;
+                    
+                    //The hit box that will surround the letters
+                    ctx.rect(x - 14, y - 16, 40, 40);
+                    ctx.stroke();
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    //Convert the numbers back to their assign letters
+                    letter = convertToLetters(numDrop[i]);
+                    
+                    //Draw the letters on screen
+                    ctx.font = "bold 20pt Calibri";
+                    ctx.fillStyle = "White";
+                    ctx.fillText(letter, x-5, y+10);
+                    
+                    
+                    /*When you have touched the letters, this function should alway
+                     check for any touch events happening on the screen
+                     */
+                    
+                    /*Since the coordinates of the touches on the screen will always be stored
+                     into the canx and cany arrays it would be okay to check the arrays after during each
+                     gameUpdate() call
+                     
+                     !!*Might be the cause of the slow downs when actually playing the game, as array size 
+                     might have gotten too big, or the loop will keep looping through the array may have 
+                     to look for another method to implement the touch*!!*/
+                    for (j = 0; j < len; j++) {
+                        
+                        //Will check if the coordinates x and y intersect with the hitboxes
+                        if (ctx.isPointInPath(canX[j], canY[j]) && mouseIsDown) {
+                            
+                            //Once letter has been poped, change position to 0
+                            position[i] = -30; 
+                            
+                            //Check if letter in the word, if so, deduct points
+                            if (numWord[LetterCounters] == numDrop[i]) {
+                                
+                                //Keep track of how many correct letters accidently touched
+                                AccidentHitOfCorrectLetter++;
+                                
+                                //Point system
+                                totalPoints = points(0);
+                                counter = 0;
+                                
+                                ctx.clearRect(0, 450, 50, can.height);
+                                percentBar = percentBar - 5;
+                            }
+                            else {
+                                
+                                //Point system
+                                counter++;
+                                ctx.clearRect(0, 450, 50, can.height); 
+                                percentBar++;
+                                totalPoints = points(1);
+                            }
+                            
+                            //Replace the poped letter with a random letter
+                            //numDrop[i] = getRandomDrop(false);
+                            numDrop[i] = getRandomPercent(LetterPercent);
+                        }
+                    }
+                }
+                
+                //For drawing the percent/health bar onto the screen
+                ctx.clearRect(310, 475,310, 25);
+                draw_b();
+                
+                //Call updateGameboard() recursively every 30 ms
+                setTimeout("updateGameBoard()", 20);
+            }
+            
+            </script>
+        
+    </head>
+    
+    <body onload="onDeviceReady()" >
+        <div id="viewporter">
+            <canvas id="can" height="500" width="310"  style="background-image:url(./background/Background.jpeg)"> </canvas>
+            <script type="text/javascript">
+                onDeviceReady();
+                </script> 
+            <!-- <canvas id="debug" height="500" width="310"  style="background-color: White"> </canvas> -->
+        </div>
+    </body>
+</html>
