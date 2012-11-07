@@ -1,0 +1,14 @@
+select Score, PlayerName, NumWordsCorrect, Time from ScoreBank join PlayerBank on ScoreBank.PlayerID = PlayerBank.PlayerID order by score DESC LIMIT 5;
+select Distinct WordName from WordBank as wb join PlayerBank as pb on wb.PlayerID = pb.PlayerID where pb.PlayerName = 'Default';
+select Syn from SynBank where WordName = 'taxi';
+Update WordBank SET WordName = 'taxi' where WordName = 'Make' AND PlayerID <> 0;
+Delete from WordBank where WordName = 'taxi' AND PlayerID <> 0;
+INSERT INTO WordBank(WordName,WordLength,PlayerID)VALUES ('UserInput3',5, (select PlayerID from PlayerBank where PlayerName = 'James'));
+INSERT INTO PlayerBank( PlayerName )VALUES('PlayerName2');
+--When adding a new word, run this optional quiery
+INSERT INTO SynBank(WordName,Syn)VALUES('crate','Cube');
+DELETE from PlayerBank where PlayerName = 'James';
+DELETE from SynBank where WordName = 'crate' AND PlayerID <> 0;
+INSERT INTO ScoreBank ( Score, PlayerID, NumWordsCorrect, Time ) VALUES ( 3939,( SELECT PlayerID FROM PlayerBank WHERE PlayerName = 'James' ),3999, 3 );
+Select WordName from WordBank where PlayerID = (select PlayerID from PlayerBank where PlayerName = 'James');
+DELETE FROM ScoreBank where PlayerID = (select PlayerID from PlayerBank where PlayerName = 'James');
